@@ -53,18 +53,24 @@ Hospedagem   → GitHub Pages / Cloudflare Pages
 O sistema é organizado em módulos com responsabilidades claras:
 
 ```
-escola-financeiro/
+dashboard-financeiro/
 ├── index.html              ← Estrutura e layout das 7 abas
 ├── style.css               ← Design system completo (tema escuro, variáveis CSS)
-├── data.js                 ← Estado global único (state)
-├── db.js                   ← Integração Supabase: save, load, realtime sync
-├── utils.js                ← Funções puras: formatação, navegação, cálculos
-├── dashboard.js            ← KPIs e 4 gráficos principais
-├── lucratividade.js        ← Análise de margem e lucro por turma
-├── gastos.js               ← CRUD de categorias + tabela de receitas
-├── lancamentos-gastos.js   ← Lançamentos individuais com sync automático
-├── lancamentos-receitas.js ← Lançamentos por aluno com sync automático
-└── app.js                  ← Inicialização, configurações, exportação
+│
+├── js/
+│   ├── data.js             ← Estado global único (state)
+│   ├── db.js               ← Integração Supabase: save, load, realtime sync
+│   ├── utils.js            ← Funções puras: formatação, navegação, cálculos
+│   ├── dashboard.js        ← KPIs e 4 gráficos principais
+│   ├── lucratividade.js    ← Análise de margem e lucro por turma
+│   ├── gastos.js           ← CRUD de categorias + tabela de receitas
+│   ├── lancamentos-gastos.js   ← Lançamentos individuais com sync automático
+│   ├── lancamentos-receitas.js ← Lançamentos por aluno com sync automático
+│   └── app.js              ← Inicialização, configurações, exportação
+│
+└── docs/
+    ├── COMO-CONFIGURAR-BANCO.html  ← Guia Supabase passo a passo
+    └── COMO-HOSPEDAR.html          ← Guia hospedagem com acesso privado
 ```
 
 ### Decisão de design: sync bidirecional

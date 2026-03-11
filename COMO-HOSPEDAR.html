@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Como Hospedar com Acesso Privado — Guia Passo a Passo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0c10;--surface:#111318;--surface2:#181c24;--border:#1e2330;--accent:#00e5c8;--accent2:#ff6b35;--accent3:#a78bfa;--gold:#f5c842;--text:#e8eaf0;--muted:#5a6070;--green:#22c55e;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;padding:40px 20px;line-height:1.6;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,200,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,200,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;}
+h1{font-size:1.8rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:6px;}
+h1 span{color:var(--accent);}
+.subtitle{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);margin-bottom:40px;}
+
+.phase{background:var(--surface);border:1px solid var(--border);border-radius:16px;margin-bottom:24px;overflow:hidden;}
+.phase-header{display:flex;align-items:center;gap:14px;padding:20px 24px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.phase-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;flex-shrink:0;}
+.phase-num.blue{background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);}
+.phase-num.orange{background:rgba(255,107,53,0.15);color:var(--accent2);border:1px solid rgba(255,107,53,0.3);}
+.phase-num.green{background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
+.phase-num.purple{background:rgba(167,139,250,0.15);color:var(--accent3);border:1px solid rgba(167,139,250,0.3);}
+.phase-title{font-size:1rem;font-weight:700;}
+.phase-sub{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);margin-top:2px;}
+.phase-body{padding:24px;}
+
+.step{display:flex;gap:16px;margin-bottom:20px;}
+.step:last-child{margin-bottom:0;}
+.step-dot{width:22px;height:22px;border-radius:50%;background:var(--border);border:2px solid var(--border);flex-shrink:0;margin-top:3px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;color:var(--muted);}
+.step-content{}
+.step-title{font-weight:700;font-size:0.9rem;margin-bottom:4px;}
+.step-desc{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);line-height:1.6;}
+.step-desc strong{color:var(--text);}
+
+.link-box{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--accent);border-radius:8px;padding:8px 14px;margin:8px 0;font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--accent);text-decoration:none;transition:all 0.15s;}
+.link-box:hover{background:rgba(0,229,200,0.08);}
+
+.code{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--accent3);display:inline-block;}
+
+.tip{display:flex;gap:10px;background:rgba(0,229,200,0.05);border:1px solid rgba(0,229,200,0.15);border-radius:8px;padding:12px 16px;margin-top:14px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);line-height:1.5;}
+.tip-icon{color:var(--accent);font-size:1rem;flex-shrink:0;}
+
+.warn{display:flex;gap:10px;background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.2);border-radius:8px;padding:12px 16px;margin-top:14px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);line-height:1.5;}
+.warn-icon{color:var(--gold);font-size:1rem;flex-shrink:0;}
+
+.summary{background:linear-gradient(135deg,rgba(0,229,200,0.08),rgba(167,139,250,0.05));border:1px solid rgba(0,229,200,0.2);border-radius:16px;padding:24px;margin-bottom:32px;}
+.summary h2{font-size:0.85rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:14px;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(30,35,48,0.6);font-family:'DM Mono',monospace;font-size:0.7rem;}
+.summary-row:last-child{border-bottom:none;}
+.summary-row .label{color:var(--muted);}
+.summary-row .val{color:var(--text);font-weight:600;}
+.summary-row .val.green{color:var(--green);}
+.summary-row .val.orange{color:var(--accent2);}
+
+.img-placeholder{background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:16px;margin:12px 0;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);text-align:center;}
+
+footer{text-align:center;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-top:40px;padding-top:20px;border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>🔒 Acesso <span>Privado</span> — Guia Completo</h1>
+<p class="subtitle">Hospedagem gratuita · Login por e-mail · 2–5 usuários · ~30 minutos para configurar</p>
+
+<!-- RESUMO -->
+<div class="summary">
+  <h2>Visão geral do que você vai fazer</h2>
+  <div class="summary-row"><span class="label">Onde o site fica hospedado</span><span class="val">Netlify (gratuito)</span></div>
+  <div class="summary-row"><span class="label">Como o acesso é protegido</span><span class="val">Cloudflare Access (gratuito, até 50 usuários)</span></div>
+  <div class="summary-row"><span class="label">Como os usuários fazem login</span><span class="val orange">Recebem código de 6 dígitos por e-mail</span></div>
+  <div class="summary-row"><span class="label">Precisa criar senha?</span><span class="val green">Não — só o e-mail já autorizado</span></div>
+  <div class="summary-row"><span class="label">Custo mensal</span><span class="val green">R$ 0,00</span></div>
+  <div class="summary-row"><span class="label">Dados ficam salvos onde?</span><span class="val">No navegador de cada usuário (localStorage)</span></div>
+</div>
+
+<!-- FASE 1 -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num blue">1</div>
+    <div>
+      <div class="phase-title">Publicar o site no Netlify</div>
+      <div class="phase-sub">~5 minutos · requer criar conta gratuita</div>
+    </div>
+  </div>
+  <div class="phase-body">
+
+    <div class="step">
+      <div class="step-dot">1</div>
+      <div class="step-content">
+        <div class="step-title">Criar conta no Netlify</div>
+        <div class="step-desc">
+          Acesse o link abaixo e clique em <strong>Sign up</strong>. Recomendamos entrar com a conta do Google — é mais rápido.
+        </div>
+        <a class="link-box" href="https://app.netlify.com/signup" target="_blank">→ app.netlify.com/signup</a>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot">2</div>
+      <div class="step-content">
+        <div class="step-title">Fazer upload dos arquivos</div>
+        <div class="step-desc">
+          Após entrar, na tela inicial clique em <strong>Add new site → Deploy manually</strong>.<br>
+          Arraste a <strong>pasta escola-financeiro</strong> inteira para a área indicada.<br>
+          Aguarde o upload (alguns segundos).
+        </div>
+        <div class="tip"><span class="tip-icon">📁</span>Arraste a <strong>pasta inteira</strong>, não os arquivos individualmente. O Netlify precisa ver o index.html na raiz.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot">3</div>
+      <div class="step-content">
+        <div class="step-title">Renomear o site</div>
+        <div class="step-desc">
+          Após o upload, você recebe um nome aleatório tipo <code class="code">amazing-cupcake-123.netlify.app</code>.<br>
+          Para mudar: vá em <strong>Site configuration → Change site name</strong>.<br>
+          Escolha algo como <code class="code">financeiro-minha-escola.netlify.app</code>.
+        </div>
+      </div>
+    </div>
+
+    <div class="tip"><span class="tip-icon">✅</span>Ao terminar essa fase, seu site já está acessível publicamente. A próxima fase vai adicionar a proteção por login.</div>
+  </div>
+</div>
+
+<!-- FASE 2 -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num orange">2</div>
+    <div>
+      <div class="phase-title">Criar conta no Cloudflare e apontar o domínio</div>
+      <div class="phase-sub">~10 minutos · necessário para ativar o bloqueio de acesso</div>
+    </div>
+  </div>
+  <div class="phase-body">
+
+    <div class="step">
+      <div class="step-dot">1</div>
+      <div class="step-content">
+        <div class="step-title">Criar conta gratuita no Cloudflare</div>
+        <div class="step-desc">Acesse o link e clique em <strong>Sign up for free</strong>. Use o mesmo e-mail que você usa no trabalho.</div>
+        <a class="link-box" href="https://dash.cloudflare.com/sign-up" target="_blank">→ dash.cloudflare.com/sign-up</a>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot">2</div>
+      <div class="step-content">
+        <div class="step-title">Ativar o Cloudflare Zero Trust</div>
+        <div class="step-desc">
+          No painel do Cloudflare, no menu esquerdo clique em <strong>Zero Trust</strong>.<br>
+          Vai pedir para configurar um nome de equipe — pode colocar o nome da escola, ex: <code class="code">minha-escola</code>.<br>
+          Escolha o plano <strong>Free</strong> (gratuito).
+        </div>
+        <a class="link-box" href="https://one.dash.cloudflare.com/" target="_blank">→ one.dash.cloudflare.com</a>
+      </div>
+    </div>
+
+    <div class="warn"><span class="warn-icon">⚠️</span>O Cloudflare Access funciona com <strong>domínios próprios</strong> (ex: minhaescola.com.br) OU com o domínio do Cloudflare Pages. Para o caminho mais simples, vamos usar o <strong>Cloudflare Pages</strong> direto em vez do Netlify — isso elimina a necessidade de um domínio próprio. Veja a Fase 2B abaixo.</div>
+  </div>
+</div>
+
+<!-- FASE 2B — CAMINHO SIMPLIFICADO -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num green">2B</div>
+    <div>
+      <div class="phase-title">✅ Caminho mais simples: Cloudflare Pages direto</div>
+      <div class="phase-sub">Hospedagem + proteção tudo no Cloudflare · sem precisar de domínio próprio</div>
+    </div>
+  </div>
+  <div class="phase-body">
+
+    <div class="step">
+      <div class="step-dot">1</div>
+      <div class="step-content">
+        <div class="step-title">Ir para Cloudflare Pages</div>
+        <div class="step-desc">
+          No painel do Cloudflare, menu esquerdo: <strong>Workers &amp; Pages → Pages → Create a project → Upload assets</strong>.
+        </div>
+        <a class="link-box" href="https://dash.cloudflare.com/?to=/:account/pages" target="_blank">→ dash.cloudflare.com → Pages</a>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot">2</div>
+      <div class="step-content">
+        <div class="step-title">Fazer upload da pasta</div>
+        <div class="step-desc">
+          Clique em <strong>Upload assets</strong>, dê um nome ao projeto (ex: <code class="code">financeiro-escola</code>),<br>
+          arraste a <strong>pasta escola-financeiro</strong> e clique <strong>Deploy site</strong>.<br>
+          Você recebe um link como <code class="code">financeiro-escola.pages.dev</code>.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot">3</div>
+      <div class="step-content">
+        <div class="step-title">Criar a política de acesso (o "bloqueio")</div>
+        <div class="step-desc">
+          Ainda no Cloudflare, vá em <strong>Zero Trust → Access → Applications → Add an application</strong>.<br>
+          Escolha <strong>Self-hosted</strong>.<br><br>
+          Preencha:<br>
+          • <strong>Application name:</strong> Dashboard Escola<br>
+          • <strong>Application domain:</strong> <code class="code">financeiro-escola.pages.dev</code><br>
+          • Clique <strong>Next</strong>.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot">4</div>
+      <div class="step-content">
+        <div class="step-title">Configurar quem pode entrar</div>
+        <div class="step-desc">
+          Na tela de políticas:<br>
+          • <strong>Policy name:</strong> Equipe Escola<br>
+          • <strong>Action:</strong> Allow<br>
+          • Em <strong>Configure rules → Include</strong>, selecione <strong>Emails</strong><br>
+          • Digite os e-mails autorizados um por um (ex: <code class="code">diretor@escola.com.br</code>, <code class="code">secretaria@escola.com.br</code>)<br><br>
+          Clique <strong>Next → Add application</strong>.
+        </div>
+        <div class="tip"><span class="tip-icon">💡</span>Você pode adicionar ou remover e-mails a qualquer momento voltando nesta tela. Não precisa reenviar nenhum arquivo.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot">5</div>
+      <div class="step-content">
+        <div class="step-title">Testar o acesso</div>
+        <div class="step-desc">
+          Abra uma aba anônima (Ctrl+Shift+N) e acesse <code class="code">financeiro-escola.pages.dev</code>.<br>
+          Deve aparecer uma tela do Cloudflare pedindo o e-mail.<br>
+          Digite um e-mail autorizado → recebe um código de 6 dígitos → digita o código → entra no sistema.<br><br>
+          <strong>Quem não tiver o e-mail na lista não consegue nem ver a página.</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FASE 3 — DADOS -->
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num purple">3</div>
+    <div>
+      <div class="phase-title">Compartilhar dados entre a equipe</div>
+      <div class="phase-sub">Os dados ficam salvos no navegador de cada usuário — veja como sincronizar</div>
+    </div>
+  </div>
+  <div class="phase-body">
+
+    <div class="step">
+      <div class="step-dot">1</div>
+      <div class="step-content">
+        <div class="step-title">Como o salvamento funciona</div>
+        <div class="step-desc">
+          Os dados ficam salvos <strong>automaticamente no navegador</strong> de cada pessoa.<br>
+          Isso significa: se você lançar uma receita no seu computador, sua colega não verá automaticamente no dela.<br><br>
+          Para compartilhar os dados entre a equipe, use o sistema de <strong>Exportar / Importar JSON</strong>.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot">2</div>
+      <div class="step-content">
+        <div class="step-title">Fluxo recomendado para equipes pequenas</div>
+        <div class="step-desc">
+          <strong>Defina uma pessoa responsável pelos lançamentos</strong> (ex: secretaria).<br>
+          Ela faz todos os lançamentos no sistema.<br>
+          Periodicamente (semanal ou mensal), ela vai em <strong>⚙️ Configurações → Exportar atual</strong>,<br>
+          copia o JSON e envia pelo WhatsApp ou e-mail para as outras pessoas.<br>
+          As outras pessoas vão em <strong>⚙️ Configurações → Importar</strong>, colam o JSON e clicam Importar.<br>
+          Pronto — todos estão com os mesmos dados.
+        </div>
+        <div class="tip"><span class="tip-icon">📋</span>O JSON é apenas texto — pode copiar e colar no WhatsApp, e-mail, Google Drive ou qualquer lugar.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot">3</div>
+      <div class="step-content">
+        <div class="step-title">Quando atualizar o site (subir novos arquivos)</div>
+        <div class="step-desc">
+          Se um dia você precisar atualizar os arquivos do sistema (novas funcionalidades),<br>
+          vá no Cloudflare Pages → seu projeto → <strong>Create new deployment</strong> → faça upload da pasta nova.<br>
+          <strong>Os dados salvos nos navegadores não são apagados</strong> — eles ficam no localStorage, separado dos arquivos do site.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>Dashboard Financeiro Escolar · Guia de Hospedagem Privada · Cloudflare Access + Pages (gratuito)</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Financeiro Escolar</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="tab-bar">
+  <span class="tab-logo">📊 Escola</span>
+  <button class="tab-btn active" id="tbtn-dashboard" onclick="showTab('dashboard',this)">Dashboard</button>
+  <button class="tab-btn" id="tbtn-lucratividade" onclick="showTab('lucratividade',this)">💰 Lucratividade</button>
+  <button class="tab-btn" id="tbtn-gastos" onclick="showTab('gastos',this)">🔴 Gastos</button>
+  <button class="tab-btn" id="tbtn-receitas" onclick="showTab('receitas',this)">💚 Receitas</button>
+  <button class="tab-btn" id="tbtn-lancamentos" onclick="showTab('lancamentos',this)">🧾 Gastos Lanç.</button>
+  <button class="tab-btn" id="tbtn-reclancamentos" onclick="showTab('reclancamentos',this)">💵 Receitas Lanç.</button>
+  <button class="tab-btn" id="tbtn-settings" onclick="showTab('settings',this)">⚙️</button>
+  <div class="tab-actions">
+    <button class="btn btn-ghost" onclick="exportCSV()">CSV</button>
+    <button class="btn btn-primary" onclick="saveAndRefresh()">↻ Atualizar</button>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="page-dashboard" class="page active">
+<div class="container">
+  <div class="filter-row">
+    <span class="filter-label">Mês:</span>
+    <button class="filter-btn active" data-month="all">Todos</button>
+    <button class="filter-btn" data-month="0">Jan</button><button class="filter-btn" data-month="1">Fev</button>
+    <button class="filter-btn" data-month="2">Mar</button><button class="filter-btn" data-month="3">Abr</button>
+    <button class="filter-btn" data-month="4">Mai</button><button class="filter-btn" data-month="5">Jun</button>
+    <button class="filter-btn" data-month="6">Jul</button><button class="filter-btn" data-month="7">Ago</button>
+    <button class="filter-btn" data-month="8">Set</button><button class="filter-btn" data-month="9">Out</button>
+    <button class="filter-btn" data-month="10">Nov</button><button class="filter-btn" data-month="11">Dez</button>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card c1"><div class="kpi-label">Receita Total</div><div class="kpi-value" id="k-rec">—</div><div class="kpi-sub" id="k-rec-sub">—</div></div>
+    <div class="kpi-card c2"><div class="kpi-label">Gastos Totais</div><div class="kpi-value" id="k-gas">—</div><div class="kpi-sub" id="k-gas-sub">—</div></div>
+    <div class="kpi-card c5"><div class="kpi-label">Lucro Líquido</div><div class="kpi-value" id="k-luc">—</div><div class="kpi-sub" id="k-luc-sub">—</div></div>
+    <div class="kpi-card c3"><div class="kpi-label">Turma Líder</div><div class="kpi-value" id="k-top">—</div><div class="kpi-sub" id="k-top-sub">—</div></div>
+    <div class="kpi-card c4"><div class="kpi-label">Margem Geral</div><div class="kpi-value" id="k-margin">—</div><div class="kpi-sub" id="k-margin-sub">—</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Receita vs Gastos por Mês</div>
+      <div class="chart-sub">Evolução mensal com linha de lucro</div>
+      <div style="height:230px"><canvas id="lineChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Gastos por Categoria</div>
+      <div class="chart-sub">Distribuição no período selecionado</div>
+      <div style="height:230px"><canvas id="catDonutChart"></canvas></div>
+    </div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Receita por Turma</div>
+      <div class="chart-sub">Comparativo no período</div>
+      <div style="height:200px"><canvas id="barChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Mapa de Calor — Receita</div>
+      <div class="chart-sub">Intensidade por turma × mês</div>
+      <div id="heatmap" style="overflow-x:auto;margin-top:2px;"></div>
+    </div>
+  </div>
+  <footer>Dashboard Financeiro · <span id="footer-year">2025</span> · Gastos divididos igualmente entre turmas</footer>
+</div>
+</div>
+
+<!-- ===== LUCRATIVIDADE ===== -->
+<div id="page-lucratividade" class="page">
+<div class="container">
+  <div class="filter-row">
+    <span class="filter-label">Período:</span>
+    <button class="filter-btn active" data-lmonth="all">Ano completo</button>
+    <button class="filter-btn" data-lmonth="0">Jan</button><button class="filter-btn" data-lmonth="1">Fev</button>
+    <button class="filter-btn" data-lmonth="2">Mar</button><button class="filter-btn" data-lmonth="3">Abr</button>
+    <button class="filter-btn" data-lmonth="4">Mai</button><button class="filter-btn" data-lmonth="5">Jun</button>
+    <button class="filter-btn" data-lmonth="6">Jul</button><button class="filter-btn" data-lmonth="7">Ago</button>
+    <button class="filter-btn" data-lmonth="8">Set</button><button class="filter-btn" data-lmonth="9">Out</button>
+    <button class="filter-btn" data-lmonth="10">Nov</button><button class="filter-btn" data-lmonth="11">Dez</button>
+  </div>
+  <div class="charts-row3">
+    <div class="chart-card">
+      <div class="chart-title">Lucro por Turma</div>
+      <div class="chart-sub">Receita − Gasto rateado</div>
+      <div style="height:210px"><canvas id="lucroBarChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Margem de Lucro %</div>
+      <div class="chart-sub">Lucro / Receita por turma</div>
+      <div style="height:210px"><canvas id="margemChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Receita vs Gasto</div>
+      <div class="chart-sub">Comparativo direto por turma</div>
+      <div style="height:210px"><canvas id="recGasChart"></canvas></div>
+    </div>
+  </div>
+  <div class="data-table-wrap">
+    <table class="data-table" id="lucro-table"></table>
+  </div>
+  <footer>Gastos totais divididos igualmente entre as <span id="luc-nturmas">—</span> turmas</footer>
+</div>
+</div>
+
+<!-- ===== GASTOS (CATEGORIAS) ===== -->
+<div id="page-gastos" class="page">
+<div class="container">
+  <div class="section-head">
+    <div>
+      <h3>🔴 Gastos por Categoria</h3>
+      <p>Cada gasto é dividido igualmente entre todas as turmas · Edite mês a mês</p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn btn-ghost" onclick="expandAllCats()">Expandir tudo</button>
+      <button class="btn btn-primary" onclick="saveAndRefresh()">↻ Aplicar</button>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span>ℹ️</span>
+    <div>O gasto de cada categoria é <strong style="color:var(--text)">dividido igualmente</strong> entre as <strong id="callout-nturmas" style="color:var(--accent)">—</strong> turmas. Ex: Conta de Luz R$3.000 → cada turma absorve <strong id="callout-share" style="color:var(--accent2)">—</strong> por mês.</div>
+  </div>
+
+  <!-- RESUMO MENSAL -->
+  <div class="chart-card" style="margin-bottom:16px;">
+    <div class="chart-title">Total de Gastos por Mês</div>
+    <div class="chart-sub">Soma de todas as categorias · clique numa categoria para destacar</div>
+    <div style="height:200px"><canvas id="gastosMensalChart"></canvas></div>
+  </div>
+
+  <div class="add-cat-row">
+    <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">+ Categoria:</span>
+    <select class="icon-select" id="new-cat-icon">
+      <option value="⚡">⚡ Luz</option><option value="💧">💧 Água</option>
+      <option value="🌐">🌐 Internet</option><option value="👨‍🏫">👨‍🏫 Professor</option>
+      <option value="📚">📚 Material</option><option value="🧹">🧹 Limpeza</option>
+      <option value="🍽️">🍽️ Alimentação</option><option value="📣">📣 Marketing</option>
+      <option value="🏗️">🏗️ Manutenção</option><option value="💼">💼 Administrativo</option>
+      <option value="🚌">🚌 Transporte</option><option value="📦">📦 Outros</option>
+    </select>
+    <input class="add-cat-input" id="new-cat-name" placeholder="Nome da categoria" />
+    <button class="btn btn-primary" onclick="addCategory()">Adicionar</button>
+  </div>
+
+  <div id="cat-grid-container" class="cat-grid"></div>
+</div>
+</div>
+
+<!-- ===== RECEITAS ===== -->
+<div id="page-receitas" class="page">
+<div class="container">
+  <div class="section-head">
+    <div>
+      <h3>💚 Receitas por Turma</h3>
+      <p>Clique em qualquer célula para editar · Totais atualizam em tempo real</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" onclick="fillSameValue()">Replicar Jan→Dez</button>
+      <button class="btn btn-primary" onclick="saveAndRefresh()">↻ Aplicar</button>
+    </div>
+  </div>
+  <div class="editor-table-wrap">
+    <table class="editor-table" id="editor-rec-table"></table>
+  </div>
+  <div class="add-row">
+    <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">+ Nova Turma:</span>
+    <input class="add-input" id="new-turma-name" placeholder="Ex: 7º ANO" />
+    <button class="btn btn-primary" onclick="addTurma()">Adicionar</button>
+  </div>
+</div>
+</div>
+
+<!-- ===== LANÇAMENTOS DETALHADOS ===== -->
+<div id="page-lancamentos" class="page">
+<div class="container">
+
+  <!-- FORM DE LANÇAMENTO -->
+  <div class="lanc-form">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:0.85rem;font-weight:800;">🧾 Novo Lançamento</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-top:2px;">Registre cada gasto individualmente · campos obrigatórios: data, valor e categoria</div>
+      </div>
+      <button class="btn btn-ghost" onclick="clearLancForm()">Limpar</button>
+    </div>
+    <div class="lanc-form-grid">
+      <div class="lanc-form-group">
+        <label class="lanc-label">Data</label>
+        <input class="lanc-input" type="date" id="lf-data">
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label">Descrição</label>
+        <input class="lanc-input" type="text" id="lf-desc" placeholder="Ex: Conta de energia elétrica">
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label">Fornecedor</label>
+        <input class="lanc-input" type="text" id="lf-fornecedor" placeholder="Ex: CEMIG, Sabesp...">
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label">Valor (R$)</label>
+        <input class="lanc-input" type="text" id="lf-valor" placeholder="0,00">
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label">Categoria</label>
+        <select class="lanc-select" id="lf-cat"></select>
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label">Nº NF / Doc</label>
+        <input class="lanc-input" type="text" id="lf-nf" placeholder="NF-001234">
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label" style="opacity:0">.</label>
+        <button class="btn btn-primary" onclick="addLancamento()" style="padding:8px 18px;white-space:nowrap;">+ Lançar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs lançamentos -->
+  <div class="lanc-kpis">
+    <div class="kpi-card c2"><div class="kpi-label">Total Lançado</div><div class="kpi-value" id="lk-total">—</div><div class="kpi-sub" id="lk-total-sub">—</div></div>
+    <div class="kpi-card c1"><div class="kpi-label">Lançamentos</div><div class="kpi-value" id="lk-count">—</div><div class="kpi-sub" id="lk-count-sub">—</div></div>
+    <div class="kpi-card c3"><div class="kpi-label">Maior Gasto</div><div class="kpi-value" id="lk-maior">—</div><div class="kpi-sub" id="lk-maior-sub">—</div></div>
+    <div class="kpi-card c4"><div class="kpi-label">Mês com mais gastos</div><div class="kpi-value" id="lk-mesmax">—</div><div class="kpi-sub" id="lk-mesmax-sub">—</div></div>
+  </div>
+
+  <!-- GRÁFICOS -->
+  <div class="lanc-charts-row3">
+    <div class="chart-card">
+      <div class="chart-title">Gastos por Categoria</div>
+      <div class="chart-sub">Total lançado por categoria</div>
+      <div style="height:200px"><canvas id="lc-cat-bar"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Evolução Mensal</div>
+      <div class="chart-sub">Total de lançamentos por mês</div>
+      <div style="height:200px"><canvas id="lc-mensal"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">% por Categoria</div>
+      <div class="chart-sub">Participação relativa dos gastos</div>
+      <div style="height:200px"><canvas id="lc-cat-donut"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TABELA CATEGORIA × MÊS -->
+  <div class="chart-card" style="margin-bottom:16px;">
+    <div class="chart-title">Tabela Categoria × Mês</div>
+    <div class="chart-sub">Total de lançamentos agregados por categoria e mês</div>
+    <div class="cat-x-mes-wrap" style="margin-top:14px;border:none;">
+      <table class="cat-x-mes-table" id="catxmes-table"></table>
+    </div>
+  </div>
+
+  <!-- FILTROS + LISTA -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+    <div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Lista de Lançamentos</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input class="lanc-search" type="text" id="lanc-search" placeholder="🔍 Buscar descrição, fornecedor, NF..." oninput="renderLancTable()">
+      <select class="lanc-select" id="lanc-filter-cat" onchange="renderLancTable()" style="width:160px;">
+        <option value="">Todas categorias</option>
+      </select>
+      <select class="lanc-select" id="lanc-filter-mes" onchange="renderLancTable()" style="width:120px;">
+        <option value="">Todos os meses</option>
+      </select>
+      <button class="btn btn-ghost" onclick="exportLancCSV()">CSV</button>
+    </div>
+  </div>
+
+  <div class="lanc-table-wrap">
+    <table class="lanc-table">
+      <thead>
+        <tr>
+          <th onclick="sortLanc('data')" id="th-data">Data ↕</th>
+          <th onclick="sortLanc('desc')">Descrição</th>
+          <th onclick="sortLanc('fornecedor')">Fornecedor</th>
+          <th onclick="sortLanc('cat')">Categoria</th>
+          <th onclick="sortLanc('valor')" style="text-align:right">Valor ↕</th>
+          <th>NF / Doc</th>
+          <th style="text-align:center">Ação</th>
+        </tr>
+      </thead>
+      <tbody id="lanc-tbody"></tbody>
+      <tfoot id="lanc-tfoot"></tfoot>
+    </table>
+  </div>
+
+  <footer>Lançamentos individuais · Dados independentes das categorias mensais · podem ser usados como conferência</footer>
+</div>
+</div>
+
+<!-- ===== RECEITAS LANÇAMENTOS ===== -->
+<div id="page-reclancamentos" class="page">
+<div class="container">
+
+  <div class="lanc-form">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:0.85rem;font-weight:800;">💵 Lançar Receita</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-top:2px;">Registre cada pagamento recebido · ao lançar, o valor é somado automaticamente na turma e mês correspondentes</div>
+      </div>
+      <button class="btn btn-ghost" onclick="clearRecLancForm()">Limpar</button>
+    </div>
+    <div class="lanc-form-grid">
+      <div class="lanc-form-group">
+        <label class="lanc-label">Data</label>
+        <input class="lanc-input" type="date" id="rl-data">
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label">Descrição</label>
+        <input class="lanc-input" type="text" id="rl-desc" placeholder="Ex: Mensalidade março">
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label">Aluno / Responsável</label>
+        <input class="lanc-input" type="text" id="rl-aluno" placeholder="Ex: João Silva">
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label">Valor (R$)</label>
+        <input class="lanc-input" type="text" id="rl-valor" placeholder="0,00">
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label">Turma</label>
+        <select class="lanc-select" id="rl-turma"></select>
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label">Nº Recibo / Doc</label>
+        <input class="lanc-input" type="text" id="rl-recibo" placeholder="REC-001">
+      </div>
+      <div class="lanc-form-group">
+        <label class="lanc-label" style="opacity:0">.</label>
+        <button class="btn btn-primary" onclick="addRecLancamento()" style="padding:8px 18px;white-space:nowrap;background:var(--accent);">+ Lançar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="lanc-kpis">
+    <div class="kpi-card c1"><div class="kpi-label">Total Recebido</div><div class="kpi-value" id="rlk-total">—</div><div class="kpi-sub" id="rlk-total-sub">—</div></div>
+    <div class="kpi-card c5"><div class="kpi-label">Lançamentos</div><div class="kpi-value" id="rlk-count">—</div><div class="kpi-sub" id="rlk-count-sub">—</div></div>
+    <div class="kpi-card c3"><div class="kpi-label">Turma com mais receita</div><div class="kpi-value" id="rlk-top">—</div><div class="kpi-sub" id="rlk-top-sub">—</div></div>
+    <div class="kpi-card c4"><div class="kpi-label">Mês mais forte</div><div class="kpi-value" id="rlk-mes">—</div><div class="kpi-sub" id="rlk-mes-sub">—</div></div>
+  </div>
+
+  <!-- GRÁFICOS -->
+  <div class="lanc-charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Receita Lançada por Turma</div>
+      <div class="chart-sub">Total acumulado de lançamentos por turma</div>
+      <div style="height:210px"><canvas id="rl-turma-bar"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Evolução Mensal de Receita</div>
+      <div class="chart-sub">Total lançado por mês</div>
+      <div style="height:210px"><canvas id="rl-mensal-bar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- FILTROS + LISTA -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+    <div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Lista de Receitas Lançadas</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input class="lanc-search" type="text" id="rl-search" placeholder="🔍 Buscar descrição, aluno, recibo..." oninput="renderRecLancTable()">
+      <select class="lanc-select" id="rl-filter-turma" onchange="renderRecLancTable()" style="width:160px;"></select>
+      <select class="lanc-select" id="rl-filter-mes" onchange="renderRecLancTable()" style="width:120px;"></select>
+      <button class="btn btn-ghost" onclick="exportRecLancCSV()">CSV</button>
+    </div>
+  </div>
+
+  <div class="lanc-table-wrap">
+    <table class="lanc-table">
+      <thead>
+        <tr>
+          <th onclick="sortRecLanc('data')">Data ↕</th>
+          <th onclick="sortRecLanc('desc')">Descrição</th>
+          <th onclick="sortRecLanc('aluno')">Aluno / Responsável</th>
+          <th onclick="sortRecLanc('turmaIdx')">Turma</th>
+          <th onclick="sortRecLanc('valor')" style="text-align:right">Valor ↕</th>
+          <th>Recibo / Doc</th>
+          <th style="text-align:center">Ação</th>
+        </tr>
+      </thead>
+      <tbody id="rl-tbody"></tbody>
+      <tfoot id="rl-tfoot"></tfoot>
+    </table>
+  </div>
+
+  <div class="callout" style="margin-top:16px;">
+    <span>💡</span>
+    <div>Cada receita lançada é <strong style="color:var(--text)">somada automaticamente</strong> à turma e ao mês correspondentes na aba <strong style="color:var(--accent)">💚 Receitas</strong> e no Dashboard. Ao excluir um lançamento, o valor é subtraído automaticamente.</div>
+  </div>
+
+  <footer>Receitas lançadas individualmente · sincronização automática com a aba Receitas</footer>
+</div>
+</div>
+
+<!-- ===== SETTINGS ===== -->
+<div id="page-settings" class="page">
+<div class="container">
+  <div class="section-head"><div><h3>⚙️ Configurações</h3><p>Personalize o dashboard</p></div></div>
+  <div class="settings-grid">
+    <div class="setting-card">
+      <h3>Geral</h3>
+      <div class="setting-row"><label>Ano letivo</label><input class="setting-input" id="cfg-year" value="2025" oninput="applySettings()"></div>
+      <div class="setting-row"><label>Nome da escola</label><input class="setting-input" id="cfg-school" value="Escola" style="width:150px" oninput="applySettings()"></div>
+    </div>
+    <div class="setting-card">
+      <h3>Meses visíveis</h3>
+      <div id="month-toggles" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+    </div>
+    <div class="setting-card">
+      <h3>Nomes dos meses</h3>
+      <div id="month-names-editor"></div>
+    </div>
+  </div>
+  <div class="setting-card" style="margin-bottom:16px;">
+    <h3>Importar / Exportar JSON</h3>
+    <p style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:10px;">Backup completo (receitas + categorias de gastos)</p>
+    <textarea id="json-editor" style="width:100%;height:160px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:12px;border-radius:8px;resize:vertical;" spellcheck="false"></textarea>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <button class="btn btn-primary" onclick="importJSON()">Importar</button>
+      <button class="btn btn-ghost" onclick="exportJSONToEditor()">Exportar atual</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+  <!-- Módulos JavaScript (ordem importa) -->
+  <script src="data.js"></script>
+  <script src="utils.js"></script>
+  <script src="dashboard.js"></script>
+  <script src="lucratividade.js"></script>
+  <script src="gastos.js"></script>
+  <script src="lancamentos-gastos.js"></script>
+  <script src="lancamentos-receitas.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

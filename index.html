@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Financeiro Escolar</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -403,7 +404,42 @@
 <!-- ===== SETTINGS ===== -->
 <div id="page-settings" class="page">
 <div class="container">
-  <div class="section-head"><div><h3>⚙️ Configurações</h3><p>Personalize o dashboard</p></div></div>
+  <div class="section-head"><div><h3>⚙️ Configurações</h3><p>Personalize o dashboard e configure o banco de dados</p></div></div>
+
+  <!-- STATUS DO BANCO -->
+  <div class="callout" style="margin-bottom:20px;">
+    <span>🗄️</span>
+    <div id="db-status" style="font-family:'DM Mono',monospace;font-size:0.65rem;">
+      <span style="color:var(--gold)">⚠️ Banco não configurado — dados salvos apenas neste navegador</span>
+    </div>
+  </div>
+
+  <!-- CONFIGURAÇÃO SUPABASE -->
+  <div class="setting-card" style="margin-bottom:20px;border-color:rgba(0,229,200,0.2);">
+    <h3 style="color:var(--accent);margin-bottom:4px;">🗄️ Banco de Dados — Supabase</h3>
+    <p style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:16px;">Configure uma vez → dados salvos na nuvem · compartilhados com toda equipe em tempo real</p>
+
+    <div style="display:grid;gap:12px;margin-bottom:14px;">
+      <div>
+        <label class="lanc-label" style="display:block;margin-bottom:5px;">URL do projeto Supabase</label>
+        <input class="lanc-input" id="cfg-sb-url" placeholder="https://xyzxyz.supabase.co" style="width:100%;max-width:500px;"
+          value="">
+        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted);margin-top:4px;">Encontre em: supabase.com → seu projeto → Settings → API → Project URL</div>
+      </div>
+      <div>
+        <label class="lanc-label" style="display:block;margin-bottom:5px;">Chave anon/public (anon key)</label>
+        <input class="lanc-input" id="cfg-sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." style="width:100%;max-width:500px;" type="password" value="">
+        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted);margin-top:4px;">Encontre em: supabase.com → Settings → API → anon public</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="dbSaveCredentials()">🔌 Conectar ao banco</button>
+      <button class="btn btn-ghost" onclick="dbReload()">🔄 Recarregar dados</button>
+      <a class="btn btn-ghost" href="COMO-CONFIGURAR-BANCO.html" target="_blank">📖 Guia passo a passo</a>
+    </div>
+  </div>
+
+  <!-- CONFIGURAÇÕES GERAIS -->
   <div class="settings-grid">
     <div class="setting-card">
       <h3>Geral</h3>
@@ -419,13 +455,17 @@
       <div id="month-names-editor"></div>
     </div>
   </div>
+
+  <!-- BACKUP JSON -->
   <div class="setting-card" style="margin-bottom:16px;">
-    <h3>Importar / Exportar JSON</h3>
-    <p style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:10px;">Backup completo (receitas + categorias de gastos)</p>
-    <textarea id="json-editor" style="width:100%;height:160px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:12px;border-radius:8px;resize:vertical;" spellcheck="false"></textarea>
-    <div style="display:flex;gap:10px;margin-top:10px;">
+    <h3>Backup JSON manual</h3>
+    <p style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:10px;">Use como backup de segurança ou para migrar dados</p>
+    <textarea id="json-editor" style="width:100%;height:140px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:12px;border-radius:8px;resize:vertical;" spellcheck="false"></textarea>
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;align-items:center;">
       <button class="btn btn-primary" onclick="importJSON()">Importar</button>
       <button class="btn btn-ghost" onclick="exportJSONToEditor()">Exportar atual</button>
+      <span style="flex:1"></span>
+      <button class="btn btn-red" onclick="resetAllData()">🗑 Apagar tudo e resetar</button>
     </div>
   </div>
 </div>
@@ -435,6 +475,7 @@
 
   <!-- Módulos JavaScript (ordem importa) -->
   <script src="data.js"></script>
+  <script src="db.js"></script>
   <script src="utils.js"></script>
   <script src="dashboard.js"></script>
   <script src="lucratividade.js"></script>

@@ -1,4 +1,4 @@
--e // ============================================================
+// ============================================================
 // gastos.js — Aba de categorias de gastos mensais
 // Contém: renderGastosPage(), renderCatCards(), updateCatValue(),
 //         addCategory(), deleteCat(), renderReceitaTable()
@@ -100,6 +100,7 @@ function deleteCat(catId){
   if(!cat) return;
   if(!confirm(`Remover categoria "${cat.nome}"?`)) return;
   state.categorias=state.categorias.filter(c=>c.id!==catId);
+  persistState();
   renderGastosPage();
   toast('Categoria removida');
 }
@@ -110,12 +111,12 @@ function addCategory(){
   if(!name){toast('Digite o nome da categoria');return;}
   state.categorias.push({id:++nextCatId,icon,nome:name,valores:Array(12).fill(0)});
   document.getElementById('new-cat-name').value='';
+  persistState();
   renderGastosPage();
   toast(`"${name}" adicionada!`);
 }
 
 function expandAllCats(){
-  // cards are always visible — just scroll to top of grid
   document.getElementById('cat-grid-container').scrollIntoView({behavior:'smooth'});
 }
 
@@ -155,12 +156,14 @@ function updateRecCell(ti,mi,val){
   const cEl=document.getElementById(`rec-col-${mi}`);if(cEl)cEl.textContent=fmt(colT);
   const grand=state.receitas.reduce((s,r)=>s+(r||[]).reduce((a,b)=>a+b,0),0);
   const aEl=document.getElementById('rec-col-all');if(aEl)aEl.textContent=fmt(grand);
+  persistState();
 }
 
-function renameTurma(ti,val){state.turmas[ti]=val.trim()||state.turmas[ti];}
+function renameTurma(ti,val){state.turmas[ti]=val.trim()||state.turmas[ti]; persistState();}
 function deleteTurma(ti){
   if(!confirm(`Remover "${state.turmas[ti]}"?`)) return;
   state.turmas.splice(ti,1);state.receitas.splice(ti,1);
+  persistState();
   renderReceitaTable();toast('Turma removida');
 }
 function addTurma(){
@@ -168,11 +171,13 @@ function addTurma(){
   if(!name){toast('Digite o nome');return;}
   state.turmas.push(name.toUpperCase());state.receitas.push(Array(12).fill(0));
   document.getElementById('new-turma-name').value='';
+  persistState();
   renderReceitaTable();toast(`"${name.toUpperCase()}" adicionada!`);
 }
 function fillSameValue(){
   const val=prompt('Preencher zeros com qual valor? Ex: 3000,00');if(!val)return;
   const num=parseBR(val);
   state.receitas.forEach(row=>{for(let m=0;m<12;m++)if(!row[m])row[m]=num;});
+  persistState();
   renderReceitaTable();toast('Valores preenchidos');
 }

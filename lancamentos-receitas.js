@@ -1,4 +1,4 @@
--e // ============================================================
+// ============================================================
 // lancamentos-receitas.js — Lançamentos individuais de receita
 // Contém: addRecLancamento(), deleteRecLanc(),
 //         renderRecLancamentos(), renderRecLancCharts(),
@@ -6,7 +6,7 @@
 // ============================================================
 
 // ===================== RECEITAS LANÇAMENTOS =====================
-let nextRecLancId = 500;
+// nextRecLancId declared in data.js
 let recLancSortKey = 'data', recLancSortDir = -1;
 
 function populateRecLancSelects(){
@@ -44,8 +44,8 @@ function addRecLancamento(){
   }
 
   clearRecLancForm();
+  persistState();
   renderRecLancamentos();
-  // atualiza aba receitas e dashboard
   if(document.getElementById('page-receitas').classList.contains('active')) renderReceitaTable();
   renderDashboard();
   toast(`✓ Receita lançada para ${state.turmas[turmaIdx]}!`);
@@ -54,12 +54,12 @@ function addRecLancamento(){
 function deleteRecLanc(id){
   const lanc = state.recLancamentos.find(l=>l.id===id);
   if(!lanc) return;
-  // ── SYNC: subtrai do array de receitas ──
   const mi = getMonthFromDate(lanc.data);
   if(mi>=0 && state.receitas[lanc.turmaIdx]){
     state.receitas[lanc.turmaIdx][mi] = Math.max(0, (state.receitas[lanc.turmaIdx][mi]||0) - lanc.valor);
   }
   state.recLancamentos = state.recLancamentos.filter(l=>l.id!==id);
+  persistState();
   renderRecLancamentos();
   if(document.getElementById('page-receitas').classList.contains('active')) renderReceitaTable();
   renderDashboard();

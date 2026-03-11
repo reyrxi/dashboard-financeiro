@@ -1,4 +1,4 @@
--e // ============================================================
+// ============================================================
 // lucratividade.js — Aba de análise de lucro por turma
 // Contém: renderLucratividade(), gráficos de lucro/margem,
 //         tabela de ranking de turmas

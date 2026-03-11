@@ -1,4 +1,4 @@
--e // ============================================================
+// ============================================================
 // lancamentos-gastos.js — Lançamentos individuais de gastos
 // Contém: addLancamento(), deleteLancAndSync(),
 //         syncLancamentosToCategoria(), renderLancamentos(),
@@ -6,7 +6,7 @@
 // ============================================================
 
 // ===================== LANÇAMENTOS =====================
-let nextLancId = 200;
+// nextLancId declared in data.js
 
 function getCatById(id){ return state.categorias.find(c=>c.id===id)||{icon:'📦',nome:'Sem categoria'}; }
 function getMonthFromDate(dateStr){ return dateStr ? parseInt(dateStr.split('-')[1])-1 : -1; }
@@ -47,8 +47,8 @@ function addLancamento(){
   // ── SYNC: recalcula os valores das categorias a partir dos lançamentos ──
   syncLancamentosToCategoria(catId);
   clearLancForm();
+  persistState();
   renderLancamentos();
-  // atualiza aba gastos se estiver aberta
   if(document.getElementById('page-gastos').classList.contains('active')) renderGastosPage();
   renderDashboard();
   toast('✓ Lançado e categorias atualizadas!');
@@ -58,6 +58,7 @@ function deleteLancAndSync(id){
   const lanc = state.lancamentos.find(l=>l.id===id);
   state.lancamentos = state.lancamentos.filter(l=>l.id!==id);
   if(lanc) syncLancamentosToCategoria(lanc.catId);
+  persistState();
   renderLancamentos();
   if(document.getElementById('page-gastos').classList.contains('active')) renderGastosPage();
   renderDashboard();

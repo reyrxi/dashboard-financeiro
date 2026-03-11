@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configurar Banco de Dados — Guia Passo a Passo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0c10;--surface:#111318;--surface2:#181c24;--border:#1e2330;--accent:#00e5c8;--accent2:#ff6b35;--accent3:#a78bfa;--gold:#f5c842;--text:#e8eaf0;--muted:#5a6070;--green:#22c55e;--red:#ff4560;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;padding:40px 20px;line-height:1.7;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,200,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,200,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
+.wrap{position:relative;z-index:1;max-width:820px;margin:0 auto;}
+h1{font-size:1.9rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:6px;}
+h1 span{color:var(--accent);}
+.sub{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);margin-bottom:36px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:20px;overflow:hidden;}
+.card-head{display:flex;align-items:center;gap:14px;padding:18px 22px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;flex-shrink:0;}
+.n1{background:rgba(0,229,200,0.12);color:var(--accent);border:1px solid rgba(0,229,200,0.3);}
+.n2{background:rgba(255,107,53,0.12);color:var(--accent2);border:1px solid rgba(255,107,53,0.3);}
+.n3{background:rgba(167,139,250,0.12);color:var(--accent3);border:1px solid rgba(167,139,250,0.3);}
+.n4{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
+.n5{background:rgba(245,200,66,0.12);color:var(--gold);border:1px solid rgba(245,200,66,0.3);}
+.card-title{font-size:0.95rem;font-weight:700;}
+.card-sub{font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);margin-top:2px;}
+.card-body{padding:22px;}
+.step{display:flex;gap:14px;margin-bottom:18px;}
+.step:last-child{margin-bottom:0;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0;margin-top:10px;}
+.s{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);line-height:1.7;}
+.s strong{color:var(--text);}
+.s .hl{color:var(--accent);font-weight:600;}
+.s .hl2{color:var(--accent2);}
+.s .hl3{color:var(--accent3);}
+.link{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--accent);border-radius:7px;padding:7px 13px;margin:8px 0;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--accent);text-decoration:none;}
+.link:hover{background:rgba(0,229,200,0.08);}
+.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-family:'DM Mono',monospace;font-size:0.72rem;color:#c9d1d9;margin:12px 0;overflow-x:auto;white-space:pre;line-height:1.6;}
+.code .kw{color:#ff7b72;}
+.code .str{color:#a5d6ff;}
+.code .cm{color:#8b949e;font-style:italic;}
+.tip{display:flex;gap:10px;background:rgba(0,229,200,0.05);border:1px solid rgba(0,229,200,0.15);border-radius:8px;padding:11px 14px;margin-top:12px;font-family:'DM Mono',monospace;font-size:0.64rem;color:var(--muted);line-height:1.6;}
+.warn{display:flex;gap:10px;background:rgba(245,200,66,0.05);border:1px solid rgba(245,200,66,0.2);border-radius:8px;padding:11px 14px;margin-top:12px;font-family:'DM Mono',monospace;font-size:0.64rem;color:var(--muted);line-height:1.6;}
+.done{background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(0,229,200,0.05));border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:20px;margin-top:24px;font-family:'DM Mono',monospace;font-size:0.72rem;line-height:1.7;}
+footer{text-align:center;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted);margin-top:40px;padding-top:18px;border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🗄️ Configurar o <span>Banco de Dados</span></h1>
+<p class="sub">Supabase · gratuito · 5 minutos · dados salvos na nuvem para toda a equipe</p>
+
+<!-- PASSO 1 -->
+<div class="card">
+  <div class="card-head"><div class="num n1">1</div><div><div class="card-title">Criar conta gratuita no Supabase</div><div class="card-sub">Sem cartão de crédito · plano gratuito é suficiente</div></div></div>
+  <div class="card-body">
+    <div class="step"><div class="dot"></div><div class="s">Acesse o site do Supabase e clique em <strong>Start your project</strong> ou <strong>Sign up</strong>.<br>Recomendamos entrar com a conta do <strong>GitHub</strong> ou <strong>Google</strong> — mais rápido.</div></div>
+    <a class="link" href="https://supabase.com" target="_blank">→ supabase.com</a>
+  </div>
+</div>
+
+<!-- PASSO 2 -->
+<div class="card">
+  <div class="card-head"><div class="num n2">2</div><div><div class="card-title">Criar um novo projeto</div><div class="card-sub">Leva ~2 minutos para o banco ficar pronto</div></div></div>
+  <div class="card-body">
+    <div class="step"><div class="dot"></div><div class="s">No painel, clique em <strong>New project</strong>.</div></div>
+    <div class="step"><div class="dot"></div><div class="s">Preencha:<br>• <strong>Name:</strong> <span class="hl">financeiro-escola</span> (ou qualquer nome)<br>• <strong>Database Password:</strong> crie uma senha forte (anote em local seguro)<br>• <strong>Region:</strong> escolha <span class="hl">South America (São Paulo)</span></div></div>
+    <div class="step"><div class="dot"></div><div class="s">Clique <strong>Create new project</strong> e aguarde ~2 minutos enquanto o banco é criado.</div></div>
+  </div>
+</div>
+
+<!-- PASSO 3 -->
+<div class="card">
+  <div class="card-head"><div class="num n3">3</div><div><div class="card-title">Criar a tabela no banco</div><div class="card-sub">Uma única tabela que armazena todo o estado do sistema</div></div></div>
+  <div class="card-body">
+    <div class="step"><div class="dot"></div><div class="s">No painel do projeto, clique em <strong>SQL Editor</strong> no menu esquerdo.</div></div>
+    <div class="step"><div class="dot"></div><div class="s">Clique em <strong>New query</strong>, cole o código abaixo e clique <strong>Run</strong> (▶):</div></div>
+    <div class="code"><span class="cm">-- Cria a tabela que armazena todos os dados do sistema</span>
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> financeiro_state (
+  id           <span class="kw">TEXT PRIMARY KEY</span>,
+  turmas       <span class="kw">JSONB</span>,
+  receitas     <span class="kw">JSONB</span>,
+  categorias   <span class="kw">JSONB</span>,
+  lancamentos  <span class="kw">JSONB</span>,
+  rec_lancamentos <span class="kw">JSONB</span>,
+  meses        <span class="kw">JSONB</span>,
+  active_months <span class="kw">JSONB</span>,
+  school       <span class="kw">TEXT</span>,
+  year         <span class="kw">TEXT</span>,
+  updated_at   <span class="kw">TIMESTAMPTZ DEFAULT NOW()</span>
+);
+
+<span class="cm">-- Libera acesso (o sistema usa a chave anon para ler e gravar)</span>
+<span class="kw">ALTER TABLE</span> financeiro_state <span class="kw">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="kw">CREATE POLICY</span> <span class="str">"acesso_total"</span> <span class="kw">ON</span> financeiro_state
+  <span class="kw">FOR ALL USING</span> (<span class="kw">true</span>) <span class="kw">WITH CHECK</span> (<span class="kw">true</span>);
+
+<span class="cm">-- Ativa atualizações em tempo real</span>
+<span class="kw">ALTER PUBLICATION</span> supabase_realtime <span class="kw">ADD TABLE</span> financeiro_state;</div>
+    <div class="tip">💡 Se aparecer <strong>"Success. No rows returned"</strong> ou <strong>"already exists"</strong>, está correto — a tabela foi criada.</div>
+  </div>
+</div>
+
+<!-- PASSO 4 -->
+<div class="card">
+  <div class="card-head"><div class="num n4">4</div><div><div class="card-title">Copiar as credenciais de acesso</div><div class="card-sub">Você vai colar esses valores nas Configurações do sistema</div></div></div>
+  <div class="card-body">
+    <div class="step"><div class="dot"></div><div class="s">No painel do projeto, clique em <strong>Settings</strong> (ícone de engrenagem) → <strong>API</strong>.</div></div>
+    <div class="step"><div class="dot"></div><div class="s">Copie os dois valores:<br><br>
+      📌 <span class="hl">Project URL</span> — parece com:<br>
+      <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:0.68rem;">https://abcdefghijk.supabase.co</code><br><br>
+      📌 <span class="hl">anon public</span> (em "Project API keys") — começa com <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:0.68rem;">eyJhbGci...</code>
+    </div></div>
+    <div class="warn">⚠️ Use sempre a chave <strong>anon</strong> (pública), nunca a <strong>service_role</strong> (privada). A anon já tem as permissões corretas que configuramos.</div>
+  </div>
+</div>
+
+<!-- PASSO 5 -->
+<div class="card">
+  <div class="card-head"><div class="num n5">5</div><div><div class="card-title">Conectar o sistema ao banco</div><div class="card-sub">Cole as credenciais nas Configurações do dashboard</div></div></div>
+  <div class="card-body">
+    <div class="step"><div class="dot"></div><div class="s">No sistema, vá na aba <span class="hl">⚙️ Configurações</span>.</div></div>
+    <div class="step"><div class="dot"></div><div class="s">Cole a <span class="hl">Project URL</span> no campo <strong>URL do projeto Supabase</strong>.</div></div>
+    <div class="step"><div class="dot"></div><div class="s">Cole a <span class="hl">anon key</span> no campo <strong>Chave anon/public</strong>.</div></div>
+    <div class="step"><div class="dot"></div><div class="s">Clique <strong>🔌 Conectar ao banco</strong>.</div></div>
+    <div class="step"><div class="dot"></div><div class="s">Se aparecer <span class="hl">🟢 Conectado ao banco · salvamento automático ativo</span>, está funcionando!</div></div>
+    <div class="tip">💡 As credenciais são salvas no navegador — você só precisa configurar uma vez por dispositivo. Cada pessoa da equipe configura no próprio computador/celular.</div>
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div class="done">
+  <div style="font-size:1rem;font-weight:800;color:var(--green);margin-bottom:12px;">✅ Pronto! Como funciona agora:</div>
+  <div style="color:var(--text);margin-bottom:6px;">• Cada lançamento, edição ou exclusão é <strong>salvo automaticamente</strong> no banco em ~1 segundo</div>
+  <div style="color:var(--text);margin-bottom:6px;">• Se outra pessoa da equipe estiver com o sistema aberto, ela vê a atualização <strong>em tempo real</strong></div>
+  <div style="color:var(--text);margin-bottom:6px;">• Os dados ficam salvos <strong>mesmo se fechar o navegador, desligar o computador ou trocar de dispositivo</strong></div>
+  <div style="color:var(--text);">• O plano gratuito do Supabase aguenta 500MB de dados e 50.000 requests/mês — <strong>mais do que suficiente para uma escola</strong></div>
+</div>
+
+<footer>Dashboard Financeiro Escolar · Guia Supabase · Banco gratuito na nuvem</footer>
+</div>
+</body>
+</html>

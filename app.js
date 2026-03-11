@@ -1,4 +1,4 @@
--e // ============================================================
+// ============================================================
 // app.js — Configurações, exportação e inicialização
 // Contém: renderSettings(), saveAndRefresh(), exportCSV(),
 //         exportJSONToEditor(), importJSON(), inicialização
@@ -39,13 +39,14 @@ function renameMonth(i,val){state.meses[i]=val.toUpperCase().substring(0,3)||sta
 
 // ===================== SAVE / EXPORT =====================
 function saveAndRefresh(){
+  persistState();
   renderDashboard();
   const activePage=document.querySelector('.page.active');
   if(activePage?.id==='page-lucratividade') renderLucratividade();
   if(activePage?.id==='page-gastos') renderGastosPage();
   if(activePage?.id==='page-lancamentos') renderLancamentos();
   if(activePage?.id==='page-reclancamentos') renderRecLancamentos();
-  toast('Atualizado!');
+  toast('✓ Salvo e atualizado!');
 }
 function exportCSV(){
   const months=[0,1,2,3,4,5,6,7,8,9,10,11];
@@ -85,9 +86,9 @@ function importJSON(){
     if(p.lancamentos)state.lancamentos=p.lancamentos;
     if(p.recLancamentos)state.recLancamentos=p.recLancamentos;
     if(p.meses)state.meses=p.meses;
-    // re-sync tudo ao importar
     syncAllCategoriasFromLancamentos();
-    renderDashboard();toast('Importado e sincronizado!');
+    persistState();
+    renderDashboard();toast('✓ Importado e salvo!');
   }catch(e){toast('JSON inválido: '+e.message);}
 }
 
@@ -106,4 +107,19 @@ document.querySelectorAll('.filter-btn[data-lmonth]').forEach(btn=>{
 });
 
 // ===================== INIT =====================
-renderDashboard();
+(async function init() {
+  // Preenche campos de credencial se já salvos
+  const savedUrl = localStorage.getItem('sb_url');
+  const savedKey = localStorage.getItem('sb_key');
+  if (savedUrl) { const el = document.getElementById('cfg-sb-url'); if(el) el.value = savedUrl; }
+  if (savedKey) { const el = document.getElementById('cfg-sb-key'); if(el) el.value = savedKey; }
+
+  // Inicia dashboard com dados locais imediatamente
+  renderDashboard();
+
+  // Tenta conectar ao Supabase (se configurado)
+  await dbInit();
+
+  // Se conectou, re-renderiza com dados do banco
+  if (dbConnected) renderDashboard();
+})();

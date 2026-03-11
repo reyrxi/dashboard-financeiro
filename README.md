@@ -1,77 +1,135 @@
-# 📊 Dashboard Financeiro Escolar
+> Sistema de gestão financeira construído por um empreendedor para resolver um problema real da própria escola — do zero, sem equipe de TI.
 
-Sistema completo de gestão financeira para escolas — receitas por turma, controle de gastos por categoria, lançamentos detalhados com NF e sincronização automática.
+**[🔗 Ver demo ao vivo →](https://reyrxi.github.io/dashboard-financeiro/)**
 
 ---
 
-## 📁 Estrutura do projeto
+## 🧠 O problema que resolvi
+
+Gerenciar as finanças de uma escola com múltiplas turmas em planilhas separadas é caótico: receitas misturadas, gastos sem categorização, impossível saber a lucratividade real por turma.
+
+Precisava de um painel que mostrasse, em tempo real:
+- Qual turma dá mais lucro?
+- Quais categorias de gasto estão pesando mais?
+- Como está o fluxo do mês comparado ao histórico?
+
+Não encontrei uma solução acessível. Então **construí uma**.
+
+---
+
+## 🎯 O que o sistema faz
+
+| Módulo | Funcionalidade |
+|--------|---------------|
+| **Dashboard** | KPIs em tempo real · gráfico receita vs gastos vs lucro · heatmap por turma |
+| **Lucratividade** | Margem e lucro líquido por turma · ranking automático · gráficos comparativos |
+| **Gastos** | 8 categorias editáveis mês a mês · rateio proporcional entre turmas |
+| **Receitas** | Tabela editável célula a célula · totais ao vivo |
+| **Lançamentos de Gastos** | Registro com data, fornecedor, NF · sincroniza categorias automaticamente |
+| **Lançamentos de Receitas** | Registro por aluno/turma · sincroniza tabela de receitas automaticamente |
+| **Configurações** | Banco de dados na nuvem · backup JSON · personalização completa |
+
+---
+
+## ⚙️ Stack técnica
+
+Escolhi tecnologias sem dependência de servidor para o sistema funcionar em qualquer lugar, incluindo offline — ideal para uma escola com infraestrutura limitada.
+
+```
+Frontend     → HTML5 + CSS3 + JavaScript puro (ES6+)
+Gráficos     → Chart.js 4.4
+Banco        → Supabase (PostgreSQL na nuvem, gratuito)
+Tempo real   → Supabase Realtime (WebSocket)
+Tipografia   → Syne + DM Mono (Google Fonts)
+Hospedagem   → GitHub Pages / Cloudflare Pages
+```
+
+**Sem frameworks, sem build tools, sem dependências de npm** — qualquer pessoa consegue abrir e rodar.
+
+---
+
+## 🏗️ Arquitetura
+
+O sistema é organizado em módulos com responsabilidades claras:
 
 ```
 escola-financeiro/
-│
-├── index.html                 ← Página principal (abre no navegador)
-├── style.css                  ← Todo o visual do sistema
-│
-├── data.js                    ← Estado global: turmas, receitas, lançamentos
-├── utils.js                   ← Funções utilitárias + navegação entre abas
-├── dashboard.js               ← KPIs e gráficos da aba Dashboard
-├── lucratividade.js           ← Análise de lucro e margem por turma
-├── gastos.js                  ← Categorias de gastos + tabela de receitas
-├── lancamentos-gastos.js      ← Lançamentos individuais de gastos (com NF)
-├── lancamentos-receitas.js    ← Lançamentos individuais de receita (por aluno)
-└── app.js                     ← Configurações, exportação e inicialização
+├── index.html              ← Estrutura e layout das 7 abas
+├── style.css               ← Design system completo (tema escuro, variáveis CSS)
+├── data.js                 ← Estado global único (state)
+├── db.js                   ← Integração Supabase: save, load, realtime sync
+├── utils.js                ← Funções puras: formatação, navegação, cálculos
+├── dashboard.js            ← KPIs e 4 gráficos principais
+├── lucratividade.js        ← Análise de margem e lucro por turma
+├── gastos.js               ← CRUD de categorias + tabela de receitas
+├── lancamentos-gastos.js   ← Lançamentos individuais com sync automático
+├── lancamentos-receitas.js ← Lançamentos por aluno com sync automático
+└── app.js                  ← Inicialização, configurações, exportação
 ```
 
----
+### Decisão de design: sync bidirecional
 
-## 🚀 Como usar localmente (sem internet)
-
-1. Baixe todos os arquivos para uma pasta no computador
-2. Abra o arquivo `index.html` no Google Chrome ou Edge
-3. Pronto — o sistema funciona 100% offline
-
-> ⚠️ **Atenção:** No Firefox, pode aparecer erro de CORS ao carregar arquivos locais. Use Chrome ou Edge.
-
----
-
-## 💾 Salvando seus dados
-
-O sistema **não tem banco de dados** — os dados ficam na memória enquanto a aba estiver aberta.
-
-### Para não perder seus dados:
-
-1. Vá em **⚙️ Configurações → Exportar atual**
-2. Copie o JSON gerado e salve num arquivo `.json` no seu computador
-3. Na próxima sessão, cole o JSON na mesma área e clique **Importar**
-
-> 💡 **Dica:** Exporte o JSON toda semana como backup. No futuro podemos adicionar salvamento automático via Google Sheets ou banco de dados.
-
----
-
-## 📋 Funcionalidades
-
-| Aba | O que faz |
-|-----|-----------|
-| **Dashboard** | KPIs, gráfico receita vs gastos, mapa de calor por turma |
-| **💰 Lucratividade** | Lucro e margem por turma, ranking, gráficos comparativos |
-| **🔴 Gastos** | Categorias editáveis mês a mês, rateio automático entre turmas |
-| **💚 Receitas** | Tabela editável por turma × mês |
-| **🧾 Gastos Lanç.** | Lançamento com data, NF, fornecedor → sincroniza categorias |
-| **💵 Receitas Lanç.** | Lançamento por aluno/turma → sincroniza tabela de receitas |
-| **⚙️ Config** | Nome da escola, ano letivo, meses visíveis, backup JSON |
-
----
-
-## 🛠️ Como editar os dados iniciais
-
-Abra o arquivo **`data.js`** e edite a variável `state`:
+A parte mais desafiadora foi a sincronização entre lançamentos e totais. Ao registrar uma fatura de luz em Janeiro, o sistema recalcula automaticamente a categoria "Conta de Luz" e atualiza o dashboard — sem o usuário precisar fazer nada.
 
 ```js
-turmas: ['MATERNAL II', 'PRÉ I', ...],   // nomes das turmas
-receitas: [[...], [...]],                  // valores por turma × mês
-categorias: [{nome:'Luz', valores:[...]}]  // gastos por categoria × mês
+// Recalcula valores[12] de uma categoria somando todos os lançamentos dela
+function syncLancamentosToCategoria(catId) { ... }
+
+// Versão completa — usada no import de backup
+function syncAllCategoriasFromLancamentos() { ... }
 ```
 
 ---
 
-*Desenvolvido com Chart.js · Fontes: Syne + DM Mono*
+## 🚀 Como rodar localmente
+
+```bash
+# Clone o repositório
+git clone https://github.com/reyrxi/dashboard-financeiro.git
+cd dashboard-financeiro
+
+# Abra no navegador (sem servidor necessário)
+open index.html   # macOS
+start index.html  # Windows
+```
+
+> ⚠️ Use Chrome ou Edge. Firefox tem restrições de CORS para arquivos locais.
+
+---
+
+## 🗄️ Configurar banco de dados (opcional)
+
+O sistema funciona offline com localStorage. Para salvar na nuvem e compartilhar com a equipe:
+
+1. Crie conta gratuita em [supabase.com](https://supabase.com)
+2. Execute o SQL de criação da tabela (veja `COMO-CONFIGURAR-BANCO.html`)
+3. Cole as credenciais em **⚙️ Configurações → Banco de Dados**
+4. Pronto — dados sincronizados em tempo real para todos os usuários
+
+---
+
+## 💡 Aprendizados
+
+Construir esse sistema me ensinou na prática:
+
+- **Gestão de estado sem framework** — manter um `state` global consistente entre 7 módulos exige disciplina e convenções claras
+- **Sync em tempo real** — WebSockets com Supabase Realtime para propagar alterações entre usuários sem reload
+- **UX para usuários não técnicos** — cada decisão de interface foi testada com a equipe da escola (secretaria, coordenação)
+- **Debounce de salvamento** — evitar chamadas excessivas ao banco com um timer de 600ms
+
+---
+
+## 🔮 Próximos passos
+
+- [ ] Autenticação por e-mail (Supabase Auth)
+- [ ] Relatório em PDF exportável
+- [ ] Comparativo entre anos letivos
+- [ ] App mobile via PWA
+
+---
+
+## 👤 Sobre
+
+Construído por um empreendedor do setor educacional que acredita que **gestores de escola deveriam ter as mesmas ferramentas de análise que empresas de tecnologia** — sem pagar R$ 500/mês por um ERP complicado.
+
+**[LinkedIn →](https://linkedin.com/in/reyrxi)** · **[Ver demo →](https://reyrxi.github.io/dashboard-financeiro/)**

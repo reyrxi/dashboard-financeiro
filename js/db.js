@@ -283,6 +283,7 @@ function refreshAllVisiblePages() {
 // FUNÇÃO PÚBLICA: chamada em todo lugar que muta o state
 // ============================================================
 function persistState() {
+  if (typeof saveUnitState === "function") saveUnitState(); // salva por unidade
   if (dbConnected) {
     dbSave();
   } else {

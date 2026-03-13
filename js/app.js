@@ -114,12 +114,9 @@ document.querySelectorAll('.filter-btn[data-lmonth]').forEach(btn=>{
   if (savedUrl) { const el = document.getElementById('cfg-sb-url'); if(el) el.value = savedUrl; }
   if (savedKey) { const el = document.getElementById('cfg-sb-key'); if(el) el.value = savedKey; }
 
-  // Inicia dashboard com dados locais imediatamente
-  renderDashboard();
+  // Mostra tela inicial de seleção de unidades
+  renderUnitsHome();
 
-  // Tenta conectar ao Supabase (se configurado)
+  // Conecta Supabase em background
   await dbInit();
-
-  // Se conectou, re-renderiza com dados do banco
-  if (dbConnected) renderDashboard();
 })();

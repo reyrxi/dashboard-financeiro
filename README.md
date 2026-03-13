@@ -66,7 +66,8 @@ dashboard-financeiro/
 │   ├── gastos.js           ← CRUD de categorias + tabela de receitas
 │   ├── lancamentos-gastos.js   ← Lançamentos individuais com sync automático
 │   ├── lancamentos-receitas.js ← Lançamentos por aluno com sync automático
-│   └── app.js              ← Inicialização, configurações, exportação
+│   ├── app.js              ← Inicialização, configurações, exportação
+│   └── units.js            ← Gerenciamento de múltiplas unidades
 │
 └── docs/
     ├── COMO-CONFIGURAR-BANCO.html  ← Guia Supabase passo a passo

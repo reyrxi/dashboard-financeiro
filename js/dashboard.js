@@ -1,4 +1,4 @@
--e // ============================================================
+// ============================================================
 // dashboard.js — Aba principal com KPIs e gráficos gerais
 // Contém: renderDashboard(), updateKPIs(), updateLineChart(),
 //         updateCatDonut(), updateBarChart(), updateHeatmap()
